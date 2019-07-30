@@ -20,8 +20,11 @@ module Simpler
 
       def log_request(env)
         @logger.info("Request: #{env['REQUEST_METHOD']} #{env['REQUEST_URI']}")
-        @logger.info("Handler: #{env['simpler.controller'].class.name}##{env['simpler.action']}")
-        @logger.info("Parameters: #{env['simpler.controller'].params}")
+
+        if env['simpler.controller']
+          @logger.info("Handler: #{env['simpler.controller'].class.name}##{env['simpler.action']}")
+          @logger.info("Parameters: #{env['simpler.controller'].params}")
+        end
       end
 
       def log_response(env, status, headers)

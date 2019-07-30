@@ -14,6 +14,7 @@ module Simpler
     def make_response(action)
       @request.env['simpler.controller'] = self
       @request.env['simpler.action'] = action
+      @request.env['simpler.render'] = 'erb'
 
       set_default_headers
       send(action)
@@ -37,7 +38,9 @@ module Simpler
     end
 
     def write_response
-      @response.write(render_body) if @response.body.empty?
+      body = render_body
+
+      @response.write(body)
     end
 
     def render_body
@@ -45,16 +48,12 @@ module Simpler
     end
 
     def render(template)
-      if template[:plain]
-        render_plain(template[:plain])
+      if template.is_a?(Hash)
+        @request.env['simpler.render'] = template.first[0]
+        @request.env['simpler.template.body'] = template.first[1]
       else
         @request.env['simpler.template'] = template
       end
-    end
-
-    def render_plain(text)
-      @response.write(text)
-      @response['Content-Type'] = 'text/plain'
     end
 
     def status(code)
