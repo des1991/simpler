@@ -14,12 +14,17 @@ module Simpler
     def make_response(action)
       @request.env['simpler.controller'] = self
       @request.env['simpler.action'] = action
+      @request.env['simpler.render'] = 'erb'
 
       set_default_headers
       send(action)
       write_response
 
       @response.finish
+    end
+
+    def params
+      @request.env['simpler.params'].merge(@request.params)
     end
 
     private
@@ -42,12 +47,21 @@ module Simpler
       View.new(@request.env).render(binding)
     end
 
-    def params
-      @request.params
+    def render(template)
+      if template.is_a?(Hash)
+        @request.env['simpler.render'] = template.first[0]
+        @request.env['simpler.template.body'] = template.first[1]
+      else
+        @request.env['simpler.template'] = template
+      end
     end
 
-    def render(template)
-      @request.env['simpler.template'] = template
+    def status(code)
+      @response.status = code
+    end
+
+    def headers
+      @response
     end
 
   end
